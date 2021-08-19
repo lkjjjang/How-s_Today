@@ -2,27 +2,19 @@ package com.example.hows_today;
 
 import java.util.HashMap;
 
-public class NowWeather {
+public class NowWeather extends Weather {
 
     protected final String rainForm;        // PTY 강수형태
     protected final String rainHour;        // PCP 강수량
     protected final String humidity;        // REH 습도
-    protected final String temperature;     // TMP 기온
-    protected final char chTemperature = 'º';
+
     //public static int resultCount = 4; // 요청 갯수
 
-    public NowWeather(HashMap<String, String> weather) {
-        this.rainForm = weather.get(ResponseCode.POP.toString());
-        this.rainHour = weather.get(ResponseCode.PCP.toString());
-        this.humidity = weather.get(ResponseCode.REH.toString());
-        this.temperature = weather.get(ResponseCode.TMP.toString());
-    }
-
-    public NowWeather(String rainForm, String rainHour, String humidity, String temperature) {
+    public NowWeather(String rainForm, String rainHour, String humidity, String temperature, String date) {
+        super(temperature, date);
         this.rainForm = rainForm;
         this.rainHour = rainHour;
         this.humidity = humidity;
-        this.temperature = temperature;
     }
 
     //# 특정 요소의 코드값 및 범주

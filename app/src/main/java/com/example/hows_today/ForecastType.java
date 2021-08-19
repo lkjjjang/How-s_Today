@@ -2,5 +2,6 @@ package com.example.hows_today;
 
 public enum ForecastType {
     NOW_WEATHER,
-    WEATHER_FORECAST
+    WEATHER_FORECAST,
+    MIN_MAX
 }

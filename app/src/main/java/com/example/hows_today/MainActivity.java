@@ -20,6 +20,8 @@ import android.provider.Settings;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
     private TextView tv_address;
     private TextView tv_weather;
@@ -35,8 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
 
     private Address address;
-    private NowWeather nowWeather;
-    private FutureWeather futureWeather;
+    private ArrayList<Weather> nowWeather = new ArrayList<>();
+    private ArrayList<Weather> futureWeathers = new ArrayList<>();
+    private ArrayList<Weather> minMaxTemperatures = new ArrayList<>();
+    //private NowWeather nowWeather;
+    //private FutureWeather futureWeather;
+    //private MinMaxTemperature minMaxTemperature;
 
     @Override
     @SuppressLint("HandlerLeak")
@@ -62,16 +68,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg) {
                 tv_weather = findViewById(R.id.tv_weather);
-                tv_weather.setText(futureWeather.getWeatherCondition());
+                WeatherCondition Wc = new WeatherCondition(futureWeathers);
+                tv_weather.setText(Wc.getWeatherCondition()); // 하루 평균을 기록
 
                 tv_rainAmount = findViewById(R.id.tv_rainAmount);
-                tv_rainAmount.setText(nowWeather.getRainHour());
+                //tv_rainAmount.setText(nowWeather.getRainHour());
 
                 tv_temperature = findViewById(R.id.tv_temperature);
-                tv_temperature.setText(nowWeather.getTemperature());
+                //tv_temperature.setText(nowWeather.getTemperature());
 
                 tv_minMaxTemperature = findViewById(R.id.tv_minMaxTemperature);
-                tv_minMaxTemperature.setText(futureWeather.getMaxMinTMP());
+                MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);
+                tv_minMaxTemperature.setText(minMaxTemp.getMaxMinTMP());
             }
         };
 
@@ -80,13 +88,17 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 JsonParse parse = new JsonParse();
 
+                ApiConnect minMaxTempConn = new ApiConnect(address, ForecastType.MIN_MAX);
+                String minMaxWeatherJson = minMaxTempConn.getWeatherInfo();
+                minMaxTemperatures = parse.JsonParse(minMaxWeatherJson, ForecastType.MIN_MAX);
+
                 ApiConnect futureWeatherConn = new ApiConnect(address, ForecastType.WEATHER_FORECAST);
-                String futureWeatherStr = futureWeatherConn.getWeatherInfo();
-                futureWeather = new FutureWeather(parse.JsonParse(futureWeatherStr, ForecastType.WEATHER_FORECAST));
+                String futureWeatherJson = futureWeatherConn.getWeatherInfo();
+                futureWeathers = parse.JsonParse(futureWeatherJson, ForecastType.WEATHER_FORECAST);
 
                 ApiConnect nowWeatherConn = new ApiConnect(address, ForecastType.NOW_WEATHER);
-                String nowWeatherStr = nowWeatherConn.getWeatherInfo();
-                nowWeather = new NowWeather(parse.JsonParse(nowWeatherStr, ForecastType.NOW_WEATHER));
+                String nowWeatherJson = nowWeatherConn.getWeatherInfo();
+                nowWeather = parse.JsonParse(nowWeatherJson, ForecastType.NOW_WEATHER);
 
                 handler.sendEmptyMessage(0);
             }

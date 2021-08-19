@@ -8,6 +8,5 @@ public enum ResponseCode {
     SNO,
     SKY,
     TMP,
-    TMN,
-    TMX,
+    DATE
 }

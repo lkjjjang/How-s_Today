@@ -2,6 +2,7 @@ package com.example.hows_today;
 
 import android.location.Address;
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,12 +26,12 @@ public class ApiConnect {
     private final String encodeType = "UTF-8";
     private final String responseType = "JSON";
     private final String pageNo = "1";
+    private final ForecastType forecastType;
     private String resultCount;
     private String time;
     private String date;
     private String LocationX;
     private String LocationY;
-    private ForecastType forecastType;
 
     public ApiConnect(Address address, ForecastType forecastType) {
         this.forecastType = forecastType;
@@ -90,15 +91,29 @@ public class ApiConnect {
                     hour = 17;
                 } else if (hour == 21 || hour == 22) {
                     hour = 20;
-                } else if (hour == 0 || hour == 1 || hour == 2) { // 하루전 데이터를 가져 와야함
+                } else if (hour == 0 || hour == 1 || hour == 2) {
                     hour = 23;
                     int yesterday = Integer.parseInt(this.date);
                     yesterday--;
                     this.date = Integer.toString(yesterday);
                 }
 
-                result = Integer.toString(hour) + "00";
+                String resultHour = Integer.toString(hour);
+                if (resultHour.length() == 1) {
+                    resultHour = "0" + resultHour;
+                }
+
+                result = resultHour + "00";
                 break;
+            case MIN_MAX:
+                // 단기예보 02시 자료요청 최고, 최고 기온 저장
+                if (hour >= 0 && hour <= 2) {
+                    int yesterday = Integer.parseInt(this.date);
+                    yesterday--;
+                    this.date = Integer.toString(yesterday); // 전일 23시 자료 요청
+                }
+
+                result = "0200";
             default:
                 break;
         }
@@ -122,9 +137,14 @@ public class ApiConnect {
                 break;
             case WEATHER_FORECAST:
                 type = this.forecast;
-                this.resultCount = "875";
+                this.resultCount = "1000";
+                break;
+            case MIN_MAX:
+                type = this.forecast;
+                this.resultCount = "150";
                 break;
             default:
+                assert false;
                 break;
         }
 
