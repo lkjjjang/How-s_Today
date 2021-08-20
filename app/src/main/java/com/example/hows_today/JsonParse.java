@@ -24,8 +24,10 @@ public class JsonParse {
     private final String MAX = "TMX";
     private final String NOT_USED_CODE_RN1 = "RN1";
     private final String NOT_USED_CODE_T1H = "T1H";
-    private final String BASE_DATE = "baseDate";
+    private final String RESULT_DATE = "fcstDate";
+    private final String RESULT_TIME = "fcstTime";
     private final String BASE_TIME = "baseTime";
+
 
     private String valueStr;
     private int outSideLoop;
@@ -44,29 +46,6 @@ public class JsonParse {
         }
 
         setBase(forecastType);
-        /*
-        String valueStr = "";
-        int outSideLoop = 0;
-        int inSideLoop = 0;
-
-        switch (forecastType) {
-            case NOW_WEATHER:
-                valueStr = this.NOW_VALUE;
-                outSideLoop = this.nowTemperatureCount;
-                inSideLoop = this.nowWeatherResponseCount;
-                break;
-            case WEATHER_FORECAST:
-                valueStr = this.FUTURE_VALUE;
-                outSideLoop = this.threeDaysInfoCount;
-                inSideLoop = this.futureWeatherResponseCount;
-                break;
-            case MIN_MAX:
-                valueStr = this.MIN_MAX_VALUE;
-                break;
-            default:
-                assert false;
-                break;
-        }*/
 
         try {
             ArrayList<Weather> results = new ArrayList<>();
@@ -100,7 +79,7 @@ public class JsonParse {
         JSONArray jsonArray = item.getJSONArray(this.OBJECT_TITLE);
 
         HashSet<String> codeSample = new HashSet<>();
-        // PTY, PCP, REH, TMP, DATE 필요한 데이터만 담아서 사용
+        // PTY, PCP, REH, TMP 필요한 데이터만 담아서 사용
         ResponseCode[] responseCodes = new ResponseCode[] {ResponseCode.PTY, ResponseCode.PCP, ResponseCode.REH, ResponseCode.TMP, ResponseCode.DATE};
 
         for (ResponseCode responseCode : responseCodes) {
@@ -108,11 +87,12 @@ public class JsonParse {
         }
 
         HashMap<String, String> resultMap = new HashMap<>();
+
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject weatherObject = jsonArray.getJSONObject(i);
 
-            String dateKey = weatherObject.get(this.BASE_DATE).toString() + weatherObject.get(this.BASE_TIME).toString();
-            resultMap.put(ResponseCode.DATE.toString(), dateKey);
+            String time = weatherObject.getString(this.BASE_TIME).toString();
+            resultMap.put(ResponseCode.DATE.toString(), time);
 
             String key = weatherObject.get(this.KEY).toString();
             String value = weatherObject.get(valueStr).toString();
@@ -132,9 +112,8 @@ public class JsonParse {
 
         ArrayList<Weather> result = new ArrayList<>();
 
-        NowWeather nowWeather = new NowWeather(resultMap.get(ResponseCode.PTY.toString()),
-                resultMap.get(ResponseCode.PCP.toString()), resultMap.get(ResponseCode.REH.toString()),
-                resultMap.get(ResponseCode.TMP.toString()), resultMap.get(ResponseCode.DATE.toString()));
+        NowWeather nowWeather = new NowWeather(resultMap.get(ResponseCode.PTY.toString()), resultMap.get(ResponseCode.PCP.toString()),
+                resultMap.get(ResponseCode.REH.toString()), resultMap.get(ResponseCode.TMP.toString()), resultMap.get(ResponseCode.DATE.toString()));
 
         result.add(nowWeather);
 
@@ -149,14 +128,9 @@ public class JsonParse {
 
         String min = "";
         String max = "";
-        String dateTime = "";
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject weatherObject = jsonArray.getJSONObject(i);
-
-            if (dateTime.length() == 0) {
-                dateTime = weatherObject.get(this.BASE_DATE).toString() + weatherObject.get(this.BASE_TIME).toString();
-            }
 
             if (weatherObject.get(this.KEY).equals(this.MIN)) {
                 if (min.length() == 0) {
@@ -171,10 +145,10 @@ public class JsonParse {
             }
         }
 
-        assert min.length() != 0 && max.length() != 0 && dateTime.length() != 0;
+        assert min.length() != 0 && max.length() != 0;
 
         ArrayList<Weather> result = new ArrayList<>();
-        MinMaxTemperature minMaxTemperature = new MinMaxTemperature(min, max, dateTime);
+        MinMaxTemperature minMaxTemperature = new MinMaxTemperature(min, max);
         result.add(minMaxTemperature);
 
         return result;
@@ -203,7 +177,7 @@ public class JsonParse {
             for (int j = 0; j < this.inSideLoop; j++) {
                 JSONObject weatherObject = jsonArray.getJSONObject(objCount++);
 
-                String dateKey = weatherObject.get(this.BASE_DATE).toString() + weatherObject.get(this.BASE_TIME).toString();
+                String dateKey = weatherObject.get(this.RESULT_DATE).toString() + weatherObject.get(this.RESULT_TIME).toString();
                 responseValues.put(ResponseCode.DATE.toString(), dateKey);
 
                 if (weatherObject.get(this.KEY).equals(this.MIN) || weatherObject.get(this.KEY).equals(this.MAX)) {

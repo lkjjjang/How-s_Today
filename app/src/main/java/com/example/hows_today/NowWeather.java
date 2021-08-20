@@ -7,14 +7,18 @@ public class NowWeather extends Weather {
     protected final String rainForm;        // PTY 강수형태
     protected final String rainHour;        // PCP 강수량
     protected final String humidity;        // REH 습도
+    protected final String date;            // 시간만 표현
+    private final int AFTERNOON = 6;
+    private final int NIGHT = 19;
 
     //public static int resultCount = 4; // 요청 갯수
 
     public NowWeather(String rainForm, String rainHour, String humidity, String temperature, String date) {
-        super(temperature, date);
+        super(temperature);
         this.rainForm = rainForm;
         this.rainHour = rainHour;
         this.humidity = humidity;
+        this.date = date;
     }
 
     //# 특정 요소의 코드값 및 범주
@@ -32,14 +36,15 @@ public class NowWeather extends Weather {
     //
     //예) PCP = 6 일 경우 강수량은 6mm
     //    PCP = 30 일 경우 강수량은 30~50mm
-    protected String getWeatherConditionOrNull() {
+    public String getWeatherCondition() {
         int code = Integer.parseInt(this.rainForm);
 
         String result = "";
 
         switch (code) {
             case 0:
-                return null;
+                result = "맑음";
+                break;
             case 1:
                 result = "비";
                 break;
@@ -63,6 +68,31 @@ public class NowWeather extends Weather {
                 break;
             default:
                 break;
+        }
+
+        return result;
+    }
+
+    public int getNowImage() {
+        float rainInt = Float.parseFloat(this.rainHour);
+
+        String date = this.date.substring(0, 2); // 앞 두글자
+
+        int time = Integer.parseInt(date);
+        int result = 0;
+
+        if (rainInt != 0.0) {
+            if (time >= this.AFTERNOON && time <= this.NIGHT) {
+                result = R.drawable.sun_rain;
+            } else {
+                result = R.drawable.night_rain;
+            }
+        } else {
+            if (time >= this.AFTERNOON && time <= this.NIGHT) {
+                result = R.drawable.sun;
+            } else {
+                result = R.drawable.half_moon;
+            }
         }
 
         return result;

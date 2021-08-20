@@ -5,22 +5,31 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.LocationManager;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.widget.Adapter;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv_address;
@@ -30,11 +39,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView tv_rainAmount;
     private TextView iv_weatherImg;
 
+    private RecyclerView recyclerView;
+    private FutureWeatherListAdapter futureWeatherListAdapter;
+    private LinearLayoutManager linearLayoutManager;
+
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     private Handler handler;
+    private Activity activity = this;
 
     private Address address;
     private ArrayList<Weather> nowWeather = new ArrayList<>();
@@ -64,24 +78,35 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void handleMessage(Message msg) {
-                tv_weather = findViewById(R.id.tv_weather);
-                WeatherCondition Wc = new WeatherCondition(futureWeathers);
-                tv_weather.setText(Wc.getWeatherCondition()); // 하루 평균을 기록
-
                 NowWeather now = (NowWeather) nowWeather.get(0);
+                tv_weather = findViewById(R.id.tv_weather);
+                tv_weather.setText(now.getWeatherCondition());
+
                 tv_rainAmount = findViewById(R.id.tv_rainAmount);
                 tv_rainAmount.setText(now.getRainHour());
 
                 tv_temperature = findViewById(R.id.tv_temperature);
                 tv_temperature.setText(now.getTemperature());
 
+                ImageView iv_weatherImg = findViewById(R.id.iv_weatherImg);
+                iv_weatherImg.setImageResource(now.getNowImage());
+
                 tv_minMaxTemperature = findViewById(R.id.tv_minMaxTemperature);
                 MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);
                 tv_minMaxTemperature.setText(minMaxTemp.getMaxMinTMP());
+
+                // 주간예보 recyclerView 관련 부분
+                recyclerView = (RecyclerView) findViewById(R.id.rv_futureWeather);
+                linearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
+                recyclerView.setLayoutManager(linearLayoutManager);
+
+                futureWeatherListAdapter = new FutureWeatherListAdapter(futureWeathers);
+                recyclerView.setAdapter(futureWeatherListAdapter);
             }
         };
 
         class NewRunnable implements Runnable {
+
             @Override
             public void run() {
                 JsonParse parse = new JsonParse();
@@ -106,8 +131,6 @@ public class MainActivity extends AppCompatActivity {
         Thread thread = new Thread(weatherThread);
         thread.start();
 
-        //ImageView iv_weatherImg = findViewById(R.id.iv_weatherImg);
-        //iv_weatherImg.setImageResource(R.drawable.cloudy);
     }
 
     public void onRequestPermissionResult(int permsRequestCode, @NonNull String[] permissions, @NonNull int[] grandResults) {

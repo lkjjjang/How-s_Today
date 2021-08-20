@@ -3,10 +3,11 @@ package com.example.hows_today;
 public class MinMaxTemperature extends Weather {
     private String minTemperature;  // TMN 최저기온
 
-    public MinMaxTemperature(String TMN, String TMX, String date) {
-        super(TMX, date);
+    public MinMaxTemperature(String TMN, String TMX) {
+        super(TMX);
         this.minTemperature = TMN;
     }
+
     public String getMaxMinTMP() {
         int min = (int) Double.parseDouble(this.minTemperature);
         int max = (int) Double.parseDouble(super.temperature);
