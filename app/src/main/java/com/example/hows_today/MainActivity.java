@@ -40,9 +40,6 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Weather> nowWeather = new ArrayList<>();
     private ArrayList<Weather> futureWeathers = new ArrayList<>();
     private ArrayList<Weather> minMaxTemperatures = new ArrayList<>();
-    //private NowWeather nowWeather;
-    //private FutureWeather futureWeather;
-    //private MinMaxTemperature minMaxTemperature;
 
     @Override
     @SuppressLint("HandlerLeak")
@@ -71,11 +68,12 @@ public class MainActivity extends AppCompatActivity {
                 WeatherCondition Wc = new WeatherCondition(futureWeathers);
                 tv_weather.setText(Wc.getWeatherCondition()); // 하루 평균을 기록
 
+                NowWeather now = (NowWeather) nowWeather.get(0);
                 tv_rainAmount = findViewById(R.id.tv_rainAmount);
-                //tv_rainAmount.setText(nowWeather.getRainHour());
+                tv_rainAmount.setText(now.getRainHour());
 
                 tv_temperature = findViewById(R.id.tv_temperature);
-                //tv_temperature.setText(nowWeather.getTemperature());
+                tv_temperature.setText(now.getTemperature());
 
                 tv_minMaxTemperature = findViewById(R.id.tv_minMaxTemperature);
                 MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);

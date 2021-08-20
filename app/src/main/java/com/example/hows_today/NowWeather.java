@@ -93,7 +93,7 @@ public class NowWeather extends Weather {
     }
 
     public String getTemperature() {
-        int temp = (int) Double.parseDouble(this.temperature);
+        int temp = (int) (Double.parseDouble(this.temperature) + 0.5);
         return Integer.toString(temp) + this.chTemperature;
     }
 }
