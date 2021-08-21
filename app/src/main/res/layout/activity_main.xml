@@ -80,39 +80,187 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:text="미세먼지"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal"
+            android:background="@drawable/dust">
 
-        <TextView
-            android:layout_width="0dp"
+            <ImageView
+                android:src="@drawable/good"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:letterSpacing="-0.05"
+                    android:gravity="center_vertical"
+                    android:text="미세먼지"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="좋음"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="12sp"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:text="초미세먼지"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal"
+            android:background="@drawable/dust_nano">
 
-        <TextView
-            android:layout_width="0dp"
+            <ImageView
+                android:src="@drawable/good"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="10sp"
+                    android:gravity="center_vertical"
+                    android:letterSpacing="-0.1"
+                    android:text="초미세먼지"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="좋음"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="12sp"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:text="자외선"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal"
+            android:background="@drawable/uv">
 
-        <TextView
-            android:layout_width="0dp"
+            <ImageView
+                android:src="@drawable/bad"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:gravity="center_vertical"
+                    android:text="자외선"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="좋음"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="12sp"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
-            android:text="오존"/>
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal"
+            android:background="@drawable/humidity">
 
-    </LinearLayout>
+            <ImageView
+                android:src="@drawable/normal"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:gravity="center_vertical"
+                    android:text="습도"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="좋음"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="12sp"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout

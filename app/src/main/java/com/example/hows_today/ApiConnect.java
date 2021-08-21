@@ -65,12 +65,22 @@ public class ApiConnect {
                 if (minute < 40) {
                     if (hour == 0) {
                         hour = 23;
+                        int yesterday = Integer.parseInt(this.date);
+                        yesterday--;
+                        this.date = Integer.toString(yesterday);
                     } else {
                         --hour;
                     }
                 }
 
-                result = Integer.toString(hour) + "00";
+                String resultStr = Integer.toString(hour);
+
+                if (resultStr.length() == 1) {
+                    resultStr = "0" + resultStr;
+                }
+
+                result = resultStr + "00";
+
                 break;
             case WEATHER_FORECAST:
                 // 단기예보

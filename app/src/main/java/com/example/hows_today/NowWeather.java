@@ -110,7 +110,7 @@ public class NowWeather extends Weather {
         } else if (rainInt < 1.0) {
             return "강수량 1mm 미만";
         } else if (rainInt >= 1.0 && rainInt < 30.0) {
-            return "강수량" + Integer.toString((int) rainInt) + "mm";
+            return "강수량 " + Integer.toString((int) rainInt) + "mm";
         } else if (rainInt < 50.0) {
             return "강수량 30mm ~ 50mm";
         } else {

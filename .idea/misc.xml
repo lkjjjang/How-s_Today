@@ -3,8 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/drawable/dust_nano.xml" value="0.3764102564102564" />
+        <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/drawable/ozone.xml" value="0.3764102564102564" />
+        <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/drawable/round.xml" value="0.3764102564102564" />
+        <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/drawable/uv.xml" value="0.3764102564102564" />
         <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/layout/activity_main.xml" value="0.3515625" />
         <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/layout/list_column.xml" value="0.36614583333333334" />
+        <entry key="..\:/Users/lkjjj/Desktop/How-s_Today/app/src/main/res/layout/round.xml" value="0.36614583333333334" />
       </map>
     </option>
   </component>
