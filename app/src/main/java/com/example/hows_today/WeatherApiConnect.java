@@ -1,11 +1,13 @@
 package com.example.hows_today;
 
+import android.annotation.SuppressLint;
 import android.location.Address;
 import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -15,26 +17,34 @@ import java.util.Date;
 // 공공데이터포털에 접속해 날씨 정보를 받아오는 클래스
 // 클래스 생성시 ForecastType 으로 현재날씨, 미래날씨 변경하여 받아옴
 
-public class ApiConnect {
+public class WeatherApiConnect {
 
     private String weatherInfo;
 
-    private final String baseURL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/";
+    private final String weatherBaseURL = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/";
     private final String serviceKey = "dkpU%2Bps2gYZHzAxIGg5PhhWwTELac3cyelA%2BiP8gWLwPefQilXdHDPfqbXKaR5FyhGqJ8gI7Y9Oppm89vVo5mA%3D%3D";
     private final String now = "getUltraSrtNcst";    // 실황
     private final String forecast = "getVilageFcst"; // 예보
     private final String encodeType = "UTF-8";
-    private final String responseType = "JSON";
+    private final String weatherResponseType = "JSON";
     private final String pageNo = "1";
+
+    private final String NOW_RESULT_COUNT = "8";
+    private final String FORECAST_RESULT_COUNT = "1000";
+    private final String MIN_MAX_RESULT_COUNT = "150";
+
     private final ForecastType forecastType;
+    private final Time dateTime;
+
     private String resultCount;
     private String time;
     private String date;
     private String LocationX;
     private String LocationY;
 
-    public ApiConnect(Address address, ForecastType forecastType) {
+    public WeatherApiConnect(CreateAddress address, Time dateTime, ForecastType forecastType) {
         this.forecastType = forecastType;
+        this.dateTime = dateTime;
         setTime();
         setLocation(address);
         connectStart();
@@ -44,15 +54,16 @@ public class ApiConnect {
         return this.weatherInfo;
     }
 
-    private void setTime() {
-        long now = System.currentTimeMillis();
-        Date date = new Date(now);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-        String getTime = sdf.format(date);
+    private void turnBackDate() {
+        int result = Integer.parseInt(this.date);
+        result--;
+        this.date = Integer.toString(result);
+    }
 
-        this.date = getTime.substring(0, 8);                   // yyyy 년 MM 월 dd 일
-        int hour = Integer.parseInt(getTime.substring(8, 10)); // 시
-        int minute = Integer.parseInt(getTime.substring(10));  // 분
+    private void setTime() {
+        this.date = this.dateTime.getYear() + this.dateTime.getMonth() + this.dateTime.getDay();
+        int hour = Integer.parseInt(this.dateTime.getHour());
+        int minute = Integer.parseInt(this.dateTime.getMinute());
 
         String result = "";
 
@@ -65,9 +76,7 @@ public class ApiConnect {
                 if (minute < 40) {
                     if (hour == 0) {
                         hour = 23;
-                        int yesterday = Integer.parseInt(this.date);
-                        yesterday--;
-                        this.date = Integer.toString(yesterday);
+                        turnBackDate();
                     } else {
                         --hour;
                     }
@@ -103,9 +112,7 @@ public class ApiConnect {
                     hour = 20;
                 } else if (hour == 0 || hour == 1 || hour == 2) {
                     hour = 23;
-                    int yesterday = Integer.parseInt(this.date);
-                    yesterday--;
-                    this.date = Integer.toString(yesterday);
+                    turnBackDate();
                 }
 
                 String resultHour = Integer.toString(hour);
@@ -118,9 +125,7 @@ public class ApiConnect {
             case MIN_MAX:
                 // 단기예보 02시 자료요청 최고, 최고 기온 저장
                 if (hour >= 0 && hour <= 2) {
-                    int yesterday = Integer.parseInt(this.date);
-                    yesterday--;
-                    this.date = Integer.toString(yesterday); // 전일 23시 자료 요청
+                    turnBackDate(); // 전일 23시 자료 요청
                 }
 
                 result = "0200";
@@ -131,47 +136,15 @@ public class ApiConnect {
         this.time = result;
     }
 
-    private void setLocation(Address address) {
-        Location CL = new Location(address);
+    private void setLocation(CreateAddress address) {
+        Location CL = new Location(address.getAddress());
         this.LocationX = Integer.toString((int) CL.getLocation().getX());
         this.LocationY = Integer.toString((int) CL.getLocation().getY());
     }
 
     private void connectStart() {
-        String type = "";
-
-        switch (this.forecastType) {
-            case NOW_WEATHER:
-                type = this.now;
-                this.resultCount = "8";
-                break;
-            case WEATHER_FORECAST:
-                type = this.forecast;
-                this.resultCount = "1000";
-                break;
-            case MIN_MAX:
-                type = this.forecast;
-                this.resultCount = "150";
-                break;
-            default:
-                assert false;
-                break;
-        }
-
         try {
-            StringBuilder urlBuilder = new StringBuilder(this.baseURL); // baseURL
-
-            urlBuilder.append(type);
-            urlBuilder.append("?").append(URLEncoder.encode("ServiceKey", this.encodeType)).append("=" + this.serviceKey); // Service Key
-            urlBuilder.append("&").append(URLEncoder.encode("pageNo", this.encodeType)).append("=").append(URLEncoder.encode(this.pageNo, this.encodeType)); // 페이지번호
-            urlBuilder.append("&").append(URLEncoder.encode("numOfRows", this.encodeType)).append("=").append(URLEncoder.encode(this.resultCount, this.encodeType)); // 한 페이지 결과 수
-            urlBuilder.append("&").append(URLEncoder.encode("dataType", this.encodeType)).append("=").append(URLEncoder.encode(this.responseType, this.encodeType)); // 자료형식(XML/JSON) Default: XML
-            urlBuilder.append("&").append(URLEncoder.encode("base_date", this.encodeType)).append("=").append(URLEncoder.encode(this.date, this.encodeType)); // 년 월 일
-            urlBuilder.append("&").append(URLEncoder.encode("base_time", this.encodeType)).append("=").append(URLEncoder.encode(this.time, this.encodeType)); // 시간
-            urlBuilder.append("&").append(URLEncoder.encode("nx", this.encodeType)).append("=").append(URLEncoder.encode(this.LocationX, this.encodeType)); // X 좌표
-            urlBuilder.append("&").append(URLEncoder.encode("ny", this.encodeType)).append("=").append(URLEncoder.encode(this.LocationY, this.encodeType)); // Y 좌표
-
-            URL url = new URL(urlBuilder.toString());
+            URL url = new URL(createUrl());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Content-type", "application/json");
@@ -200,6 +173,42 @@ public class ApiConnect {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String createUrl() throws UnsupportedEncodingException {
+        String type = "";
+
+        switch (this.forecastType) {
+            case NOW_WEATHER:
+                type = this.now;
+                this.resultCount = this.NOW_RESULT_COUNT;
+                break;
+            case WEATHER_FORECAST:
+                type = this.forecast;
+                this.resultCount = this.FORECAST_RESULT_COUNT;
+                break;
+            case MIN_MAX:
+                type = this.forecast;
+                this.resultCount = this.MIN_MAX_RESULT_COUNT;
+                break;
+            default:
+                assert false;
+                break;
+        }
+
+        StringBuilder sb = new StringBuilder(this.weatherBaseURL); // baseURL
+
+        sb.append(type);
+        sb.append("?").append(URLEncoder.encode("ServiceKey", this.encodeType)).append("=" + this.serviceKey); // Service Key
+        sb.append("&").append(URLEncoder.encode("pageNo", this.encodeType)).append("=").append(URLEncoder.encode(this.pageNo, this.encodeType)); // 페이지번호
+        sb.append("&").append(URLEncoder.encode("numOfRows", this.encodeType)).append("=").append(URLEncoder.encode(this.resultCount, this.encodeType)); // 한 페이지 결과 수
+        sb.append("&").append(URLEncoder.encode("dataType", this.encodeType)).append("=").append(URLEncoder.encode(this.weatherResponseType, this.encodeType)); // 자료형식(XML/JSON) Default: XML
+        sb.append("&").append(URLEncoder.encode("base_date", this.encodeType)).append("=").append(URLEncoder.encode(this.date, this.encodeType)); // 년 월 일
+        sb.append("&").append(URLEncoder.encode("base_time", this.encodeType)).append("=").append(URLEncoder.encode(this.time, this.encodeType)); // 시간
+        sb.append("&").append(URLEncoder.encode("nx", this.encodeType)).append("=").append(URLEncoder.encode(this.LocationX, this.encodeType)); // X 좌표
+        sb.append("&").append(URLEncoder.encode("ny", this.encodeType)).append("=").append(URLEncoder.encode(this.LocationY, this.encodeType)); // Y 좌표
+
+        return sb.toString();
     }
 }
 

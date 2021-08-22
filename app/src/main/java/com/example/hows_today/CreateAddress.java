@@ -22,9 +22,12 @@ public class CreateAddress {
         return this.address;
     }
 
-    public String getAddressStr() {
-        // XX구 XX동 을 반환
-        return this.address.getSubLocality() + ' ' + this.address.getThoroughfare();
+    public String getGu() {
+        return this.address.getSubLocality();
+    }
+
+    public String getDong() {
+        return this.address.getThoroughfare();
     }
 
     private void createAddress(Activity activity) {

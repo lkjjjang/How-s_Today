@@ -23,21 +23,41 @@ import android.os.Message;
 import android.provider.Settings;
 import android.widget.Adapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
+    private Time time = new Time();
+
     private TextView tv_address;
     private TextView tv_weather;
     private TextView tv_temperature;
     private TextView tv_minMaxTemperature;
     private TextView tv_rainAmount;
-    private TextView iv_weatherImg;
+
+    private LinearLayout ll_dust;
+    private ImageView iv_dust;
+    private TextView tv_dust;
+
+    private LinearLayout ll_microDust;
+    private ImageView iv_microDust;
+    private TextView tv_microDust;
+
+    private LinearLayout ll_uv;
+    private ImageView iv_uv;
+    private TextView tv_uv;
+
+    private LinearLayout ll_humidity;
+    private ImageView iv_humidity;
+    private TextView tv_humidity;
 
     private RecyclerView recyclerView;
     private FutureWeatherListAdapter futureWeatherListAdapter;
@@ -50,10 +70,11 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
     private Activity activity = this;
 
-    private Address address;
+    private CreateAddress address;
     private ArrayList<Weather> nowWeather = new ArrayList<>();
     private ArrayList<Weather> futureWeathers = new ArrayList<>();
     private ArrayList<Weather> minMaxTemperatures = new ArrayList<>();
+    private DustInfo dustInfo;
 
     @Override
     @SuppressLint("HandlerLeak")
@@ -69,10 +90,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         CreateAddress createAddress = new CreateAddress(this);
-        this.address = createAddress.getAddress();
+        this.address = createAddress;
 
         this.tv_address = findViewById(R.id.tv_address);
-        this.tv_address.setText(createAddress.getAddressStr());
+        String addressPrint = createAddress.getGu() + " " + createAddress.getDong();
+        this.tv_address.setText(addressPrint);
 
         handler = new Handler() {
             @SuppressLint("SetTextI18n")
@@ -82,20 +104,49 @@ public class MainActivity extends AppCompatActivity {
                 tv_weather = findViewById(R.id.tv_weather);
                 tv_weather.setText(now.getWeatherCondition());
 
-                tv_rainAmount = findViewById(R.id.tv_rainAmount);
+                tv_rainAmount = (TextView) findViewById(R.id.tv_rainAmount);
                 tv_rainAmount.setText(now.getRainHour());
 
-                tv_temperature = findViewById(R.id.tv_temperature);
+                tv_temperature = (TextView) findViewById(R.id.tv_temperature);
                 tv_temperature.setText(now.getTemperature());
 
-                ImageView iv_weatherImg = findViewById(R.id.iv_weatherImg);
+                ImageView iv_weatherImg = (ImageView) findViewById(R.id.iv_weatherImg);
                 iv_weatherImg.setImageResource(now.getNowImage());
 
-                tv_minMaxTemperature = findViewById(R.id.tv_minMaxTemperature);
+                tv_minMaxTemperature = (TextView) findViewById(R.id.tv_minMaxTemperature);
                 MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);
                 tv_minMaxTemperature.setText(minMaxTemp.getMaxMinTMP());
 
-                // 주간예보 recyclerView 관련 부분
+                // 미세먼지, 초미세먼지, 자외선, 습도
+                ll_dust = (LinearLayout) findViewById(R.id.ll_dust);
+                iv_dust = (ImageView) findViewById(R.id.iv_dust);
+                tv_dust = (TextView) findViewById(R.id.tv_dust);
+
+                DustPrint dustPrint = new DustPrint(dustInfo.getDustInfo(), ll_dust, iv_dust, tv_dust);
+                dustPrint.print();
+
+                ll_microDust = (LinearLayout) findViewById(R.id.ll_microDust);
+                iv_microDust = (ImageView) findViewById(R.id.iv_microDust);
+                tv_microDust = (TextView) findViewById(R.id.tv_microDust);
+
+                DustPrint microDust = new DustPrint(dustInfo.getMicroDustGrade(), ll_microDust, iv_microDust, tv_microDust);
+                microDust.print();
+
+                ll_uv = (LinearLayout) findViewById(R.id.ll_uv);
+                iv_uv = (ImageView) findViewById(R.id.iv_uv);
+                tv_uv = (TextView) findViewById(R.id.tv_uv);
+
+                DustPrint uv = new DustPrint(dustInfo.getDustInfo(), ll_uv, iv_uv, tv_uv);
+                uv.print();
+
+                ll_humidity = (LinearLayout) findViewById(R.id.ll_humidity);
+                iv_humidity = (ImageView) findViewById(R.id.iv_humidity);
+                tv_humidity = (TextView) findViewById(R.id.tv_humidity);
+
+                DustPrint humidity = new DustPrint(((NowWeather) nowWeather.get(0)).getHumidity(), ll_humidity, iv_humidity, tv_humidity);
+                humidity.print();
+
+                // 시간별 예보 recyclerView 관련 부분
                 recyclerView = (RecyclerView) findViewById(R.id.rv_futureWeather);
                 linearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
                 recyclerView.setLayoutManager(linearLayoutManager);
@@ -111,17 +162,20 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 JsonParse parse = new JsonParse();
 
-                ApiConnect minMaxTempConn = new ApiConnect(address, ForecastType.MIN_MAX);
+                WeatherApiConnect minMaxTempConn = new WeatherApiConnect(address, time, ForecastType.MIN_MAX);
                 String minMaxWeatherJson = minMaxTempConn.getWeatherInfo();
                 minMaxTemperatures = parse.JsonParse(minMaxWeatherJson, ForecastType.MIN_MAX);
 
-                ApiConnect futureWeatherConn = new ApiConnect(address, ForecastType.WEATHER_FORECAST);
+                WeatherApiConnect futureWeatherConn = new WeatherApiConnect(address, time, ForecastType.WEATHER_FORECAST);
                 String futureWeatherJson = futureWeatherConn.getWeatherInfo();
                 futureWeathers = parse.JsonParse(futureWeatherJson, ForecastType.WEATHER_FORECAST);
 
-                ApiConnect nowWeatherConn = new ApiConnect(address, ForecastType.NOW_WEATHER);
+                WeatherApiConnect nowWeatherConn = new WeatherApiConnect(address, time, ForecastType.NOW_WEATHER);
                 String nowWeatherJson = nowWeatherConn.getWeatherInfo();
                 nowWeather = parse.JsonParse(nowWeatherJson, ForecastType.NOW_WEATHER);
+
+                dustInfo = new DustInfo(address);
+
 
                 handler.sendEmptyMessage(0);
             }
@@ -176,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("위치 서비스 비활성화");
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n" + "위치 설정을 수정 하시겠습니까?");
         builder.setCancelable(true);
+
         builder.setPositiveButton("설정", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -213,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
             // 3-1 사용자가 퍼미션 거부한 경우
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, REQUIRED_PERMISSIONS[0])) {
                 // 3-2 요청전 사용자에게 퍼미션이 필요한 이유를 설명
-                Toast.makeText(MainActivity.this, "이 앱을 시랭하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "이 앱을 실행 하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
 
                 // 3-3 사용자에게 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionResult 에서 수신됨
                 ActivityCompat.requestPermissions(MainActivity.this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);

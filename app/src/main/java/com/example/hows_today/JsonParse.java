@@ -28,7 +28,6 @@ public class JsonParse {
     private final String RESULT_TIME = "fcstTime";
     private final String BASE_TIME = "baseTime";
 
-
     private String valueStr;
     private int outSideLoop;
     private int inSideLoop;

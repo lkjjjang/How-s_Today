@@ -85,15 +85,17 @@
         android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/ll_dust"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:orientation="horizontal"
-            android:background="@drawable/dust">
+            android:background="@drawable/back_base">
 
             <ImageView
+                android:id="@+id/iv_dust"
                 android:src="@drawable/good"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -117,6 +119,7 @@
                     android:text="미세먼지"/>
 
                 <TextView
+                    android:id="@+id/tv_dust"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="좋음"
@@ -131,15 +134,17 @@
 
 
         <LinearLayout
+            android:id="@+id/ll_microDust"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:orientation="horizontal"
-            android:background="@drawable/dust_nano">
+            android:background="@drawable/back_good">
 
             <ImageView
+                android:id="@+id/iv_microDust"
                 android:src="@drawable/good"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -163,6 +168,7 @@
                     android:text="초미세먼지"/>
 
                 <TextView
+                    android:id="@+id/tv_microDust"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="좋음"
@@ -176,15 +182,17 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ll_uv"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:orientation="horizontal"
-            android:background="@drawable/uv">
+            android:background="@drawable/back_bad">
 
             <ImageView
+                android:id="@+id/iv_uv"
                 android:src="@drawable/bad"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -207,6 +215,7 @@
                     android:text="자외선"/>
 
                 <TextView
+                    android:id="@+id/tv_uv"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="좋음"
@@ -219,15 +228,17 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ll_humidity"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:orientation="horizontal"
-            android:background="@drawable/humidity">
+            android:background="@drawable/back_normal">
 
             <ImageView
+                android:id="@+id/iv_humidity"
                 android:src="@drawable/normal"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -250,6 +261,7 @@
                     android:text="습도"/>
 
                 <TextView
+                    android:id="@+id/tv_humidity"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="좋음"
@@ -278,7 +290,7 @@
                 android:id="@+id/tv_futureWeatherTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="주간 예보"
+                android:text="시간별 예보"
                 android:textSize="20sp"/>
 
         </LinearLayout>
@@ -295,7 +307,6 @@
                 android:scrollbarFadeDuration="0">
 
             </androidx.recyclerview.widget.RecyclerView>
-
 
         </LinearLayout>
 
