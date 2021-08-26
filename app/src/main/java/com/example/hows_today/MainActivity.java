@@ -92,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         // 위치 권한 설정
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
