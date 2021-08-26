@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textStyle="bold"
-            android:text="구, 동"
+            android:text="@string/gu_dong"
             android:textSize="30sp"/>
 
         <TextView
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="날씨 표현"
+            android:text="@string/weather"
             android:textSize="20sp"/>
 
         <TextView
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="강수량"
+            android:text="@string/rain_hour"
             android:textSize="15sp"/>
 
     </LinearLayout>
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:textStyle="bold"
-            android:text="온도"
+            android:text="@string/temperature"
             android:textSize="50dp"/>
 
         <TextView
@@ -71,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="최저/ 최고"/>
+            android:text="@string/min_max"/>
 
     </LinearLayout>
 

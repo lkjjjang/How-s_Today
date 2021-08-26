@@ -13,6 +13,8 @@ public class CreateAddress {
 
     private GpsTracker gpsTracker;
     private Address address;
+    private String lat;
+    private String lon;
 
     public CreateAddress(Activity activity) {
         createAddress(activity);
@@ -30,6 +32,14 @@ public class CreateAddress {
         return this.address.getThoroughfare();
     }
 
+    public String getLat() {
+        return this.lat;
+    }
+
+    public String getLon() {
+        return this.lon;
+    }
+
     private void createAddress(Activity activity) {
         // geocoder 주소 예시
         // 대한민국 서울특별시 관악구 보라매동
@@ -37,6 +47,9 @@ public class CreateAddress {
 
         double latitude = this.gpsTracker.getLatitude(); // GpsTracker 에서 위도, 경도 받아옴
         double longitude = this.gpsTracker.getLongitude();
+
+        this.lat = Integer.toString((int) latitude);
+        this.lon = Integer.toString((int) longitude);
 
         setAddress(activity, latitude, longitude);
     }

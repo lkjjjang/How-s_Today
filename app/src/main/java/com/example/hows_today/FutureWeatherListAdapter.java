@@ -16,6 +16,14 @@ public class FutureWeatherListAdapter extends RecyclerView.Adapter<FutureWeather
 
     private final ArrayList<Weather> weathers;
     private final int rainProbability = 35;
+    private final String ZERO_HOUR_CLOCK = "24";
+    private final int SKY_GRADE_GOOD = 5;
+    private final int SKY_GARDE_NORMAL = 8;
+    private final int RAIN = R.drawable.rain;
+    private final int SUN_CLOUDY = R.drawable.sun_cloudy;
+    private final int SUN = R.drawable.sun;
+    private final int CLOUDY = R.drawable.cloudy;
+    private final int HALF_MOON = R.drawable.half_moon;
 
     public FutureWeatherListAdapter(ArrayList<Weather> weathers) {
         this.weathers = weathers;
@@ -56,21 +64,21 @@ public class FutureWeatherListAdapter extends RecyclerView.Adapter<FutureWeather
 
         if (time >= 6 && time <= 18) {
             if (rainProbability >= this.rainProbability) {
-                result = R.drawable.rain;
+                result = this.RAIN;
             } else {
-                if (sky <= 5) {
-                    result = R.drawable.sun;
-                } else if (sky <= 8) {
-                    result = R.drawable.sun_cloudy;
+                if (sky <= this.SKY_GRADE_GOOD) {
+                    result = this.SUN;
+                } else if (sky <= this.SKY_GARDE_NORMAL) {
+                    result = this.SUN_CLOUDY;
                 } else {
-                    result = R.drawable.cloudy;
+                    result = this.CLOUDY;
                 }
             }
         } else {
             if (rainProbability >= this.rainProbability) {
-                result = R.drawable.rain;
+                result = this.RAIN;
             } else {
-                result = R.drawable.half_moon;
+                result = this.HALF_MOON;
             }
         }
 
@@ -91,7 +99,7 @@ public class FutureWeatherListAdapter extends RecyclerView.Adapter<FutureWeather
         int length = date.length();
         String dateStr = date.substring(length - 4, length - 2); // 끝 두자리는 00 임
 
-        if (dateStr.equals("24")) {
+        if (dateStr.equals(this.ZERO_HOUR_CLOCK)) {
             dateStr = "00";
         }
 

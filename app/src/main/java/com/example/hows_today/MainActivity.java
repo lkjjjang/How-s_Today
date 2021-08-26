@@ -1,6 +1,7 @@
 package com.example.hows_today;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -17,8 +18,10 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.LocationManager;
 import android.media.session.MediaSession;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.widget.Adapter;
@@ -28,6 +31,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -35,7 +41,7 @@ import java.util.Date;
 import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity {
-    private Time time = new Time();
+    private final Time time = new Time();
 
     private TextView tv_address;
     private TextView tv_weather;
@@ -65,22 +71,28 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
+    private final Activity activity = this;
     String[] REQUIRED_PERMISSIONS = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
-    private Handler handler;
-    private Activity activity = this;
+    private Handler nowWeatherHandler;
+    private Handler minWeatherHandler;
+    private Handler futureHandler;
+    private Handler emoticonLayoutHandler;
 
     private CreateAddress address;
     private ArrayList<Weather> nowWeather = new ArrayList<>();
     private ArrayList<Weather> futureWeathers = new ArrayList<>();
     private ArrayList<Weather> minMaxTemperatures = new ArrayList<>();
     private DustInfo dustInfo;
+    private UvInfo uvInfo;
 
     @Override
     @SuppressLint("HandlerLeak")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         // 위치 권한 설정
         if (!checkLocationServicesStatus()) {
@@ -89,101 +101,8 @@ public class MainActivity extends AppCompatActivity {
             checkRunTimePermission();
         }
 
-        CreateAddress createAddress = new CreateAddress(this);
-        this.address = createAddress;
-
-        this.tv_address = findViewById(R.id.tv_address);
-        String addressPrint = createAddress.getGu() + " " + createAddress.getDong();
-        this.tv_address.setText(addressPrint);
-
-        handler = new Handler() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void handleMessage(Message msg) {
-                NowWeather now = (NowWeather) nowWeather.get(0);
-                tv_weather = findViewById(R.id.tv_weather);
-                tv_weather.setText(now.getWeatherCondition());
-
-                tv_rainAmount = (TextView) findViewById(R.id.tv_rainAmount);
-                tv_rainAmount.setText(now.getRainHour());
-
-                tv_temperature = (TextView) findViewById(R.id.tv_temperature);
-                tv_temperature.setText(now.getTemperature());
-
-                ImageView iv_weatherImg = (ImageView) findViewById(R.id.iv_weatherImg);
-                iv_weatherImg.setImageResource(now.getNowImage());
-
-                tv_minMaxTemperature = (TextView) findViewById(R.id.tv_minMaxTemperature);
-                MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);
-                tv_minMaxTemperature.setText(minMaxTemp.getMaxMinTMP());
-
-                // 미세먼지, 초미세먼지, 자외선, 습도
-                ll_dust = (LinearLayout) findViewById(R.id.ll_dust);
-                iv_dust = (ImageView) findViewById(R.id.iv_dust);
-                tv_dust = (TextView) findViewById(R.id.tv_dust);
-
-                DustPrint dustPrint = new DustPrint(dustInfo.getDustInfo(), ll_dust, iv_dust, tv_dust);
-                dustPrint.print();
-
-                ll_microDust = (LinearLayout) findViewById(R.id.ll_microDust);
-                iv_microDust = (ImageView) findViewById(R.id.iv_microDust);
-                tv_microDust = (TextView) findViewById(R.id.tv_microDust);
-
-                DustPrint microDust = new DustPrint(dustInfo.getMicroDustGrade(), ll_microDust, iv_microDust, tv_microDust);
-                microDust.print();
-
-                ll_uv = (LinearLayout) findViewById(R.id.ll_uv);
-                iv_uv = (ImageView) findViewById(R.id.iv_uv);
-                tv_uv = (TextView) findViewById(R.id.tv_uv);
-
-                DustPrint uv = new DustPrint(dustInfo.getDustInfo(), ll_uv, iv_uv, tv_uv);
-                uv.print();
-
-                ll_humidity = (LinearLayout) findViewById(R.id.ll_humidity);
-                iv_humidity = (ImageView) findViewById(R.id.iv_humidity);
-                tv_humidity = (TextView) findViewById(R.id.tv_humidity);
-
-                DustPrint humidity = new DustPrint(((NowWeather) nowWeather.get(0)).getHumidity(), ll_humidity, iv_humidity, tv_humidity);
-                humidity.print();
-
-                // 시간별 예보 recyclerView 관련 부분
-                recyclerView = (RecyclerView) findViewById(R.id.rv_futureWeather);
-                linearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
-                recyclerView.setLayoutManager(linearLayoutManager);
-
-                futureWeatherListAdapter = new FutureWeatherListAdapter(futureWeathers);
-                recyclerView.setAdapter(futureWeatherListAdapter);
-            }
-        };
-
-        class NewRunnable implements Runnable {
-
-            @Override
-            public void run() {
-                JsonParse parse = new JsonParse();
-
-                WeatherApiConnect minMaxTempConn = new WeatherApiConnect(address, time, ForecastType.MIN_MAX);
-                String minMaxWeatherJson = minMaxTempConn.getWeatherInfo();
-                minMaxTemperatures = parse.JsonParse(minMaxWeatherJson, ForecastType.MIN_MAX);
-
-                WeatherApiConnect futureWeatherConn = new WeatherApiConnect(address, time, ForecastType.WEATHER_FORECAST);
-                String futureWeatherJson = futureWeatherConn.getWeatherInfo();
-                futureWeathers = parse.JsonParse(futureWeatherJson, ForecastType.WEATHER_FORECAST);
-
-                WeatherApiConnect nowWeatherConn = new WeatherApiConnect(address, time, ForecastType.NOW_WEATHER);
-                String nowWeatherJson = nowWeatherConn.getWeatherInfo();
-                nowWeather = parse.JsonParse(nowWeatherJson, ForecastType.NOW_WEATHER);
-
-                dustInfo = new DustInfo(address);
-
-
-                handler.sendEmptyMessage(0);
-            }
-        }
-
-        NewRunnable weatherThread = new NewRunnable();
-        Thread thread = new Thread(weatherThread);
-        thread.start();
+        setAddress();
+        mainActivityPrint();
 
     }
 
@@ -215,6 +134,168 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "권한설정이 거부 되었습니다. 설정(앱 정보)에서 권한을 허용해야 합니다.", Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+
+    private void setAddress() {
+        CreateAddress createAddress = new CreateAddress(this);
+        this.address = createAddress;
+
+        this.tv_address = findViewById(R.id.tv_address);
+        String addressPrint = createAddress.getGu() + " " + createAddress.getDong();
+        this.tv_address.setText(addressPrint);
+    }
+
+    private void mainActivityPrint() {
+        nowWeatherHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message m) {
+                NowWeather now = (NowWeather) nowWeather.get(0);
+                tv_weather = findViewById(R.id.tv_weather);
+                tv_weather.setText(now.getWeatherCondition());
+
+                tv_rainAmount = (TextView) findViewById(R.id.tv_rainAmount);
+                tv_rainAmount.setText(now.getRainHour());
+
+                tv_temperature = (TextView) findViewById(R.id.tv_temperature);
+                tv_temperature.setText(now.getTemperature());
+
+                ImageView iv_weatherImg = (ImageView) findViewById(R.id.iv_weatherImg);
+                iv_weatherImg.setImageResource(now.getNowImage());
+
+                ll_humidity = (LinearLayout) findViewById(R.id.ll_humidity);
+                iv_humidity = (ImageView) findViewById(R.id.iv_humidity);
+                tv_humidity = (TextView) findViewById(R.id.tv_humidity);
+
+                // 고민중
+                CenterImage humidity = new CenterImage(((NowWeather) nowWeather.get(0)).getHumidity(), ll_humidity, iv_humidity, tv_humidity);
+                humidity.print();
+            }
+        };
+
+        class NowWeatherThread implements Runnable {
+            @Override
+            public void run() {
+                JsonParse parse = new JsonParse();
+
+                WeatherApiConnect nowWeatherConn = new WeatherApiConnect(address, time, ForecastType.NOW_WEATHER);
+                String nowWeatherJson = nowWeatherConn.getWeatherInfo();
+                nowWeather = parse.JsonParse(nowWeatherJson, ForecastType.NOW_WEATHER);
+
+                nowWeatherHandler.sendEmptyMessage(0);
+            }
+        }
+
+        NowWeatherThread nowWeatherThread = new NowWeatherThread();
+        Thread nowThread = new Thread(nowWeatherThread);
+
+        minWeatherHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message m) {
+                tv_minMaxTemperature = (TextView) findViewById(R.id.tv_minMaxTemperature);
+                MinMaxTemperature minMaxTemp = (MinMaxTemperature) minMaxTemperatures.get(0);
+                tv_minMaxTemperature.setText(minMaxTemp.getMaxMinTMP());
+            }
+        };
+
+        class MinWeatherThread implements Runnable {
+            @Override
+            public void run() {
+                JsonParse parse = new JsonParse();
+
+                WeatherApiConnect minMaxTempConn = new WeatherApiConnect(address, time, ForecastType.MIN_MAX);
+                String minMaxWeatherJson = minMaxTempConn.getWeatherInfo();
+                minMaxTemperatures = parse.JsonParse(minMaxWeatherJson, ForecastType.MIN_MAX);
+
+                minWeatherHandler.sendEmptyMessage(0);
+            }
+        }
+
+        MinWeatherThread MinWeatherThread = new MinWeatherThread();
+        Thread MinThread = new Thread(MinWeatherThread);
+
+        futureHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message m) {
+                recyclerView = (RecyclerView) findViewById(R.id.rv_futureWeather);
+                linearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
+                recyclerView.setLayoutManager(linearLayoutManager);
+
+                futureWeatherListAdapter = new FutureWeatherListAdapter(futureWeathers);
+                recyclerView.setAdapter(futureWeatherListAdapter);
+            }
+        };
+
+        class FutureWeatherThread implements Runnable {
+            @Override
+            public void run() {
+                JsonParse parse = new JsonParse();
+
+                WeatherApiConnect futureWeatherConn = new WeatherApiConnect(address, time, ForecastType.WEATHER_FORECAST);
+                String futureWeatherJson = futureWeatherConn.getWeatherInfo();
+                futureWeathers = parse.JsonParse(futureWeatherJson, ForecastType.WEATHER_FORECAST);
+
+                futureHandler.sendEmptyMessage(0);
+            }
+        }
+
+        FutureWeatherThread futureWeatherThread = new FutureWeatherThread();
+        Thread futureThread = new Thread(futureWeatherThread);
+
+        emoticonLayoutHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message m) {
+                ll_dust = (LinearLayout) findViewById(R.id.ll_dust);
+                iv_dust = (ImageView) findViewById(R.id.iv_dust);
+                tv_dust = (TextView) findViewById(R.id.tv_dust);
+
+                CenterImage dustPrint = new CenterImage(dustInfo.getDustInfo(), ll_dust, iv_dust, tv_dust);
+                dustPrint.print();
+
+                ll_microDust = (LinearLayout) findViewById(R.id.ll_microDust);
+                iv_microDust = (ImageView) findViewById(R.id.iv_microDust);
+                tv_microDust = (TextView) findViewById(R.id.tv_microDust);
+
+                CenterImage microDust = new CenterImage(dustInfo.getMicroDustGrade(), ll_microDust, iv_microDust, tv_microDust);
+                microDust.print();
+
+                ll_uv = (LinearLayout) findViewById(R.id.ll_uv);
+                iv_uv = (ImageView) findViewById(R.id.iv_uv);
+                tv_uv = (TextView) findViewById(R.id.tv_uv);
+
+                CenterImage uv = new CenterImage(uvInfo.getGrade(), ll_uv, iv_uv, tv_uv);
+                uv.print();
+            }
+        };
+
+        class EmoticonLayoutThread implements Runnable {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void run() {
+                dustInfo = new DustInfo(address);
+
+                try {
+                    uvInfo = new UvInfo(address);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                emoticonLayoutHandler.sendEmptyMessage(0);
+            }
+        }
+
+        EmoticonLayoutThread emoticonLayoutThread = new EmoticonLayoutThread();
+        Thread emoticonThread = new Thread(emoticonLayoutThread);
+
+        ArrayList<Thread> threads = new ArrayList<>();
+
+        threads.add(nowThread);
+        threads.add(MinThread);
+        threads.add(futureThread);
+        threads.add(emoticonThread);
+
+        for (Thread thread : threads) {
+            thread.start();
         }
     }
 
@@ -279,4 +360,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
+
 }

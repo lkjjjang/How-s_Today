@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">How\'s_Today</string>
+    <string name="app_name">오늘어때</string>
+    <string name="gu_dong">구, 동</string>
+    <string name="weather">날씨</string>
+    <string name="rain_hour">강수량</string>
+    <string name="temperature">온도</string>
+    <string name="min_max">최고 / 최저</string>
 </resources>

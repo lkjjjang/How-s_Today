@@ -1,6 +1,7 @@
 package com.example.hows_today;
 
 import android.location.Address;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +33,8 @@ public class DustInfo {
     private final String VER = "1.0";
     private final String stationName;
     private final String json;
+    private final String DUST = "pm10Grade";
+    private final String MICRO_DUST = "pm25Grade";
 
     public DustInfo(CreateAddress address) {
         this.stationName = address.getGu();
@@ -62,8 +65,13 @@ public class DustInfo {
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject weatherObject = jsonArray.getJSONObject(i);
-            this.dustGrade = weatherObject.get("pm10Grade").toString();
-            this.microDustGrade = weatherObject.get("pm25Grade").toString();
+
+            this.dustGrade = weatherObject.get(this.DUST).toString();
+            this.microDustGrade = weatherObject.get(this.MICRO_DUST).toString();
+
+            if (this.dustGrade == null || this.microDustGrade == null) {
+                Log.e(">>", "response is null");
+            }
         }
     }
 
@@ -74,7 +82,6 @@ public class DustInfo {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Content-type", "application/json");
-            System.out.println("Response code: " + conn.getResponseCode());
             BufferedReader rd;
 
             if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
@@ -93,6 +100,7 @@ public class DustInfo {
             rd.close();
             conn.disconnect();
             result = sb.toString();
+            System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace();;
         }

@@ -4,7 +4,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class DustPrint {
+public class CenterImage {
 
     private final LinearLayout linearLayout;
     private final ImageView imageView;
@@ -24,7 +24,7 @@ public class DustPrint {
 
     private int grade;
 
-    public DustPrint(String dustInfo, LinearLayout linearLayout, ImageView imageView, TextView textView) {
+    public CenterImage(String dustInfo, LinearLayout linearLayout, ImageView imageView, TextView textView) {
         this.linearLayout = linearLayout;
         this.imageView = imageView;
         this.textView = textView;
